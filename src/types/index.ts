@@ -51,3 +51,18 @@ export interface WeekStats {
   streak: number;
   trend: 'up' | 'down' | 'neutral';
 }
+
+export interface DayData {
+  date: Date;
+  dayName: string;      // "MON", "TUE", etc.
+  dateNumber: number;   // 1-31
+  isToday: boolean;
+  isPast: boolean;
+}
+
+export interface WeekData {
+  startDate: Date;      // Monday
+  endDate: Date;        // Sunday
+  days: DayData[];
+  label: string;        // "Jan 20 - 26, 2025"
+}

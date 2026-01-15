@@ -558,33 +558,49 @@ Elements that MUST have data-testid attributes:
 
 **Directory**: Create `.agents/plans/` if it doesn't exist
 
-### Plan Length Guidelines
+### Plan Length Requirements
 
-**Target Length**: 600-900 lines (increased to accommodate Playwright validation section)
+**HARD LIMITS**: 700-1000 lines | **NEVER exceed 1000 lines**
 
-The plan must balance comprehensiveness with conciseness. A well-structured plan within this range demonstrates:
+The 1000-line cap is a strict requirement to prevent context bloat. Plans must be information-dense and concise while remaining comprehensive enough for one-pass implementation.
 
-- **Focused Context**: Include only information directly relevant to implementation—no filler or redundant explanations
-- **Dense Information**: Every line should add value; prefer bullet points and code snippets over prose
-- **Clear Structure**: Use consistent formatting and headers so the execution agent can navigate quickly
-- **Actionable Tasks**: Tasks should be specific enough to execute but not over-documented with obvious details
-- **Complete Validation**: Playwright steps should be detailed enough for the validation agent to execute without ambiguity
+**Why This Matters:**
+- Long plans consume excessive context in execution agents
+- Dense, focused plans have higher implementation success rates
+- Brevity forces prioritization of truly essential information
 
-**If your plan exceeds 900 lines:**
-- Consolidate similar tasks into grouped sections
-- Remove generic guidance that repeats project-wide conventions
-- Replace lengthy explanations with pattern references (`MIRROR: path/to/file.py:15-30`)
-- Trim validation commands to essential checks only
-- Combine similar Playwright flows if they test the same outcome
+**Information Density Principles:**
 
-**If your plan is under 600 lines:**
-- Ensure all context references are included with specific line numbers
+- **Focused Context**: Include ONLY information directly relevant to implementation—ruthlessly cut filler
+- **Dense Information**: Every line must add value; prefer bullet points and code snippets over prose
+- **Pattern References Over Repetition**: Use `MIRROR: path/to/file.py:15-30` instead of copying patterns
+- **Actionable Tasks**: Specific enough to execute, not over-documented with obvious details
+- **Essential Validation**: Include only flows that verify distinct user outcomes
+
+**If your plan approaches or exceeds 1000 lines (MANDATORY cuts):**
+1. **Consolidate tasks**: Group related tasks into single task blocks
+2. **Use pattern references**: Replace inline code examples with `PATTERN: file:line-range`
+3. **Trim boilerplate**: Remove generic guidance covered by CLAUDE.md
+4. **Merge Playwright flows**: Combine flows testing similar outcomes
+5. **Shorten documentation links**: One line per link, cut "Why" explanations if obvious
+6. **Remove redundant validation**: Keep only essential commands per task
+7. **Cut prose explanations**: Convert paragraphs to single-line bullets
+
+**If your plan is under 700 lines:**
+- Ensure all mandatory context references are included with specific line numbers
 - Verify edge cases and error handling are documented
 - Add testing strategy details specific to the feature
 - Include integration points that might be overlooked
-- **Ensure Playwright validation section is complete with all flows**
+- Ensure Playwright validation section is complete with all flows
+- Add gotchas and anti-patterns discovered during research
 
 ## Quality Criteria
+
+### Line Count Validation ✓ (CHECK FIRST)
+
+- [ ] **Plan is between 700-1000 lines** (use `wc -l` to verify)
+- [ ] If over 1000: Apply mandatory cuts before saving
+- [ ] If under 700: Verify all sections are adequately detailed
 
 ### Context Completeness ✓
 
@@ -627,6 +643,8 @@ The plan must balance comprehensiveness with conciseness. A well-structured plan
 
 ## Success Metrics
 
+**Line Count Compliant**: Plan is 700-1000 lines (HARD REQUIREMENT - verify with `wc -l`)
+
 **One-Pass Implementation**: Execution agent can complete feature without additional research or clarification
 
 **Validation Complete**: Every task has at least one working validation command
@@ -639,8 +657,11 @@ The plan must balance comprehensiveness with conciseness. A well-structured plan
 
 ## Report
 
+**BEFORE SAVING**: Run `wc -l` on the plan file. If >1000 lines, apply mandatory cuts until compliant.
+
 After creating the Plan, provide:
 
+- **Line count**: X lines (must be 700-1000)
 - Summary of feature and approach
 - Full path to created Plan file
 - Complexity assessment
