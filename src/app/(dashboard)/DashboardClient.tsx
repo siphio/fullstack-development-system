@@ -20,7 +20,7 @@ interface DashboardClientProps {
 export function DashboardClient({ userEmail }: DashboardClientProps) {
   const { weekData, goToNextWeek, goToPrevWeek, goToThisWeek, isCurrentWeek } =
     useWeekNavigation();
-  const { tasksByDate, isLoading, createTask, editTask, deleteTask, completeTask } =
+  const { tasksByDate, isLoading, createTask, editTask, deleteTask, completeTask, reorderTasks, moveTaskToDay } =
     useTasks(weekData);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,6 +71,8 @@ export function DashboardClient({ userEmail }: DashboardClientProps) {
             tasksByDate={tasksByDate}
             onTaskComplete={completeTask}
             onTaskClick={handleTaskClick}
+            onReorderWithinDay={reorderTasks}
+            onMoveToDay={moveTaskToDay}
           />
         )}
         <InsightsSidebar />

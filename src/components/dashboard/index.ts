@@ -6,3 +6,4 @@ export { InsightsSidebar } from './InsightsSidebar';
 export { NewTaskButton } from './NewTaskButton';
 export { TaskCard } from './TaskCard';
 export { TaskModal } from './TaskModal';
+export { SortableTaskCard } from './SortableTaskCard';

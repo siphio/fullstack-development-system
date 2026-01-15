@@ -9,6 +9,7 @@ interface TaskCardProps {
   task: Task;
   onComplete: (taskId: string) => void;
   onClick: (task: Task) => void;
+  isDragging?: boolean;
 }
 
 const categoryColors: Record<string, string> = {
@@ -17,7 +18,7 @@ const categoryColors: Record<string, string> = {
   urgent: 'bg-category-urgent',
 };
 
-export function TaskCard({ task, onComplete, onClick }: TaskCardProps) {
+export function TaskCard({ task, onComplete, onClick, isDragging = false }: TaskCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleComplete = (e: React.MouseEvent) => {
@@ -32,8 +33,9 @@ export function TaskCard({ task, onComplete, onClick }: TaskCardProps) {
       data-testid={`task-card-${task.id}`}
       className={cn(
         'group bg-card rounded-lg p-3 shadow-card cursor-pointer transition-all duration-200',
-        isHovered && !task.isCompleted && 'shadow-card-hover -translate-y-0.5',
-        task.isCompleted && 'opacity-60'
+        isHovered && !task.isCompleted && !isDragging && 'shadow-card-hover -translate-y-0.5',
+        task.isCompleted && 'opacity-60',
+        isDragging && 'shadow-card-drag rotate-2 scale-105'
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

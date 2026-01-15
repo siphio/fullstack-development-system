@@ -1,18 +1,26 @@
 'use client';
 
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
-import { TaskCard } from './TaskCard';
+import { SortableTaskCard } from './SortableTaskCard';
 import type { DayData, Task } from '@/types';
 
 interface DayColumnProps {
   day: DayData;
+  dateKey: string; // yyyy-MM-dd format
   tasks: Task[];
   onTaskComplete: (taskId: string) => void;
   onTaskClick: (task: Task) => void;
 }
 
-export function DayColumn({ day, tasks, onTaskComplete, onTaskClick }: DayColumnProps) {
+export function DayColumn({ day, dateKey, tasks, onTaskComplete, onTaskClick }: DayColumnProps) {
   const testIdSuffix = day.dayName.toLowerCase();
+  const taskIds = tasks.map((t) => t.id);
+
+  const { setNodeRef, isOver } = useDroppable({
+    id: dateKey,
+  });
 
   return (
     <div className="flex flex-col min-w-[120px] flex-1" data-testid={`day-column-${testIdSuffix}`}>
@@ -44,15 +52,24 @@ export function DayColumn({ day, tasks, onTaskComplete, onTaskClick }: DayColumn
       </div>
 
       {/* Task Area */}
-      <div className="flex-1 p-2 space-y-2 min-h-[200px]">
-        {tasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onComplete={onTaskComplete}
-            onClick={onTaskClick}
-          />
-        ))}
+      <div
+        ref={setNodeRef}
+        className={cn(
+          'flex-1 p-2 space-y-2 min-h-[200px] transition-colors',
+          isOver && 'bg-primary/5 rounded-lg'
+        )}
+        data-testid={`day-tasks-${testIdSuffix}`}
+      >
+        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+          {tasks.map((task) => (
+            <SortableTaskCard
+              key={task.id}
+              task={task}
+              onComplete={onTaskComplete}
+              onClick={onTaskClick}
+            />
+          ))}
+        </SortableContext>
         {tasks.length === 0 && !day.isPast && (
           <div className="text-center text-xs text-muted-foreground py-8 opacity-50">
             {day.isToday ? 'Start your day?' : 'Plan something?'}

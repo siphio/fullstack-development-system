@@ -124,6 +124,74 @@ export function useTasks(weekData: WeekData) {
     await editTask(taskId, { isCompleted: true });
   };
 
+  const reorderTasks = async (date: string, taskIds: string[]): Promise<void> => {
+    const prevTasks = tasks.filter((t) => t.scheduledDate === date);
+
+    // Optimistic update - reorder in store
+    taskIds.forEach((id, index) => {
+      updateTask(id, { position: index });
+    });
+
+    try {
+      const res = await fetch('/api/tasks/reorder', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date, taskIds }),
+      });
+      if (!res.ok) throw new Error('Failed to reorder tasks');
+    } catch (err) {
+      // Rollback
+      prevTasks.forEach((t) => updateTask(t.id, { position: t.position }));
+      throw err;
+    }
+  };
+
+  const moveTaskToDay = async (
+    taskId: string,
+    fromDate: string,
+    toDate: string,
+    newPosition: number
+  ): Promise<void> => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    const prevState = { scheduledDate: task.scheduledDate, position: task.position };
+
+    // Optimistic update
+    updateTask(taskId, { scheduledDate: toDate, position: newPosition });
+
+    // Reorder tasks in target date
+    const targetTasks = tasks
+      .filter((t) => t.scheduledDate === toDate && t.id !== taskId)
+      .sort((a, b) => a.position - b.position);
+
+    targetTasks.splice(newPosition, 0, { ...task, scheduledDate: toDate });
+    targetTasks.forEach((t, idx) => {
+      if (t.id !== taskId) updateTask(t.id, { position: idx });
+    });
+
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scheduledDate: toDate, position: newPosition }),
+      });
+      if (!res.ok) throw new Error('Failed to move task');
+
+      // Batch update positions for affected tasks in target column
+      const reorderRes = await fetch('/api/tasks/reorder', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: toDate, taskIds: targetTasks.map((t) => t.id) }),
+      });
+      if (!reorderRes.ok) throw new Error('Failed to reorder after move');
+    } catch (err) {
+      // Rollback the moved task
+      updateTask(taskId, prevState);
+      throw err;
+    }
+  };
+
   const tasksByDate = tasks.reduce<Record<string, Task[]>>((acc, task) => {
     const date = task.scheduledDate;
     if (!acc[date]) acc[date] = [];
@@ -144,6 +212,8 @@ export function useTasks(weekData: WeekData) {
     editTask,
     deleteTask,
     completeTask,
+    reorderTasks,
+    moveTaskToDay,
     refetch: fetchTasks,
   };
 }
