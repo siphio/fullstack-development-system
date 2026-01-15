@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * Phase 2: Core Dashboard Layout Validation
@@ -17,7 +17,7 @@ const TEST_USER = {
 const BASE_URL = 'http://localhost:3000';
 
 // Helper function to login
-async function login(page: any) {
+async function login(page: Page) {
   await page.goto(`${BASE_URL}/login`);
   await page.getByTestId('auth-email-input').fill(TEST_USER.email);
   await page.getByTestId('auth-password-input').fill(TEST_USER.password);
@@ -189,7 +189,7 @@ test.describe('Phase 2: Core Dashboard Layout', () => {
         await page.waitForURL(/.*\/login/, { timeout: 10000 });
         await expect(page.getByTestId('login-page')).toBeVisible();
         console.log('✅ User menu and sign out validation passed');
-      } catch (e) {
+      } catch {
         // If redirect doesn't happen, sign out button might need implementation fix
         console.log('⚠️ Sign out clicked but redirect did not occur - auth implementation may need review');
         // Still mark test as passing since UI elements are present
