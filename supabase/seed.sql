@@ -1,0 +1,3 @@
+-- Test user: test@taskflow.dev / TestPassword123!
+-- Sample tasks seeded after user signs up via the trigger
+-- Run `supabase db reset` after test user creation to populate tasks
